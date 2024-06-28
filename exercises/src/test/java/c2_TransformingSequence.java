@@ -1,3 +1,7 @@
+import java.time.Duration;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,8 +31,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void transforming_sequence() {
         Flux<Integer> numbersFlux = numerical_service()
-                //todo change only this line
-                ;
+                .map(i -> i+1);
 
         //StepVerifier is used for testing purposes
         //ignore it for now, or explore it independently
@@ -48,12 +51,18 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
         Flux<Integer> numbersFlux = numerical_service_2();
 
         //todo: do your changes here
-        Flux<String> resultSequence = null;
+        Flux<String> resultSequence = numbersFlux.flatMap(i -> returnSymbol(i));
 
         //don't change code below
         StepVerifier.create(resultSequence)
                     .expectNext(">", "<", "=", ">", ">")
                     .verifyComplete();
+    }
+    
+    private Flux<String> returnSymbol(Integer i) {
+    	if(i>0) return Flux.just(">");
+    	if(i<0) return Flux.just("<");
+    	return Flux.just("=");
     }
 
     /**
@@ -65,7 +74,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void cast() {
         Flux<String> numbersFlux = object_service()
-                .map(i -> (String) i); //todo: change this line only
+        		.cast(String.class);
 
 
         StepVerifier.create(numbersFlux)
@@ -79,9 +88,9 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
      */
     @Test
     public void maybe() {
-        Mono<String> result = maybe_service()
-                //todo: change this line only
-                ;
+        Mono<String> result = maybe_service().defaultIfEmpty("no results");
+                
+                
 
         StepVerifier.create(result)
                     .expectNext("no results")
@@ -95,8 +104,8 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void sequence_sum() {
         //todo: change code as you need
-        Mono<Integer> sum = null;
-        numerical_service();
+        Mono<Integer> sum = numerical_service().reduce((a, b) -> a+b);
+        
 
         //don't change code below
         StepVerifier.create(sum)
